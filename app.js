@@ -27,20 +27,16 @@ mongoose.connect(DB, {
 });
 
 app.use(express.json());
-app.use(require('./utils/rateLimiter'));
 
 app.use(requestLogger);
+
+app.use(require('./utils/rateLimiter'));
 
 app.use(require('./routes/auth'));
 
 app.use(require('./middlewares/auth'));
 
 app.use(require('./routes/index'));
-
-// app.use('/users', require('./routes/users'));
-// app.use('/movies', require('./routes/movies'));
-
-// app.use('/', (req, res, next) => next(new NotFoundError('Ресурс не найден')));
 
 app.use((err, req, res, next) => {
   if (isCelebrateError(err)) {
