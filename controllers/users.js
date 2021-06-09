@@ -49,13 +49,7 @@ module.exports.createUser = (req, res, next) => {
       .then((user) => res.send({
         _id: user._id, name, email,
       }))
-      .catch((err) => {
-        if (err.name === 'MongoError' && err.code === 11000) {
-          return next(new ConflictError('Email уже зарегестрирован'));
-        }
-
-        return next(err);
-      });
+      .catch((err) => next(err));
   });
 };
 
