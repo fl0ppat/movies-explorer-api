@@ -12,20 +12,14 @@ module.exports.getSavedMovies = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-module.exports.createMovie = (req, res, next) => {
-  if (typeof (req.body) === 'undefined') {
-    return next(new BadRequestError('Ошибка добавления в избранное'));
-  }
-
-  return User.findByIdAndUpdate(
-    req.user,
-    { $addToSet: { movies: req.body.movieId } },
-  )
-    .orFail(new NotFoundError('Ошибка добавления в избранное. Пользователь не найден'))
-    .then(Movie.create(addOwnerToMovie(req.body, req.user)))
-    .then(res.send({ message: `Фильм ${req.body.nameRU} добавлен в избранное` }))
-    .catch((err) => next(err));
-};
+module.exports.createMovie = (req, res, next) => User.findByIdAndUpdate(
+  req.user,
+  { $addToSet: { movies: req.body.movieId } },
+)
+  .orFail(new NotFoundError('Ошибка добавления в избранное. Пользователь не найден'))
+  .then(Movie.create(addOwnerToMovie(req.body, req.user)))
+  .then(res.send({ message: `Фильм ${req.body.nameRU} добавлен в избранное` }))
+  .catch((err) => next(err));
 
 module.exports.deleteMovie = (req, res, next) => User.findByIdAndUpdate(
   req.user,
