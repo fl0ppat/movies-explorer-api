@@ -29,10 +29,9 @@ router.post('/', celebrate({
 
 router.delete('/:id', celebrate({
   params: Joi.object({
-    id: Joi.number().integer().messages({
-      'any.rquired': 'Не указано поле {#label}',
-      'number.empty': 'Поле {#label} не содержит информацию',
-      'number.base': 'Поле {#label} должно иметь тип number',
+    id: Joi.string().hex().length(24).messages({
+      'string.hex': 'Ошибка в полученном id',
+      'string.length': 'Ошибка в полученном id',
     }),
   }),
 }), deleteMovie);

@@ -27,21 +27,15 @@ module.exports.createMovie = (req, res, next) => {
     .catch((err) => next(err));
 };
 
-module.exports.deleteMovie = (req, res, next) => {
-  if (typeof (req.params) === 'undefined') {
-    return next(new BadRequestError('Ошибка удаления из избранного'));
-  }
-
-  return User.findByIdAndUpdate(
-    req.user,
-    { $pull: { movies: req.params.id } },
-  )
-    .orFail(new NotFoundError('Ошибка удаления из избранного. Пользователь не найден'))
-    .then(Movie.deleteMany({ movieId: req.params.id, owner: req.user })
-      .then((result) => {
-        if (result.deletedCount === 0) {
-          return next(new NotFoundError('Ошибка удаления из избранного. Фильм не найден'));
-        }
-        return res.send({ message: 'Фильм удалён из избранного' });
-      }).catch((err) => next(err)));
-};
+module.exports.deleteMovie = (req, res, next) => User.findByIdAndUpdate(
+  req.user,
+  { $pull: { movies: req.params.id } },
+)
+  .orFail(new NotFoundError('Ошибка удаления из избранного. Пользователь не найден'))
+  .then(Movie.deleteMany({ _id: req.params.id, owner: req.user })
+    .then((result) => {
+      if (result.deletedCount === 0) {
+        return next(new NotFoundError('Ошибка удаления из избранного. Фильм не найден'));
+      }
+      return res.send({ message: 'Фильм удалён из избранного' });
+    }).catch((err) => next(err)));
