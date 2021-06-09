@@ -4,7 +4,6 @@ const { isCelebrateError } = require('celebrate');
 const cors = require('cors');
 const helmet = require('helmet');
 
-const NotFoundError = require('./errors/NotFound');
 const handleError = require('./middlewares/error');
 const BadRequestError = require('./errors/BadRequest');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -36,10 +35,12 @@ app.use(require('./routes/auth'));
 
 app.use(require('./middlewares/auth'));
 
-app.use('/users', require('./routes/users'));
-app.use('/movies', require('./routes/movies'));
+app.use(require('./routes/index'));
 
-app.use('/', (req, res, next) => next(new NotFoundError('Ресурс не найден')));
+// app.use('/users', require('./routes/users'));
+// app.use('/movies', require('./routes/movies'));
+
+// app.use('/', (req, res, next) => next(new NotFoundError('Ресурс не найден')));
 
 app.use((err, req, res, next) => {
   if (isCelebrateError(err)) {
