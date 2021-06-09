@@ -2,7 +2,6 @@ const Movie = require('../models/movie');
 const User = require('../models/user');
 
 const NotFoundError = require('../errors/NotFound');
-const BadRequestError = require('../errors/BadRequest');
 
 const { addOwnerToMovie } = require('../utils/index');
 
