@@ -25,7 +25,7 @@ module.exports.deleteMovie = (req, res, next) => User.findByIdAndUpdate(
   { $pull: { movies: req.params.id } },
 )
   .orFail(new NotFoundError('Ошибка удаления из избранного. Пользователь не найден'))
-  .then(Movie.deleteMany({ _id: req.params.id, owner: req.user })
+  .then(Movie.deleteMany({ movieId: req.params.id, owner: req.user })
     .then((result) => {
       if (result.deletedCount === 0) {
         return next(new NotFoundError('Ошибка удаления из избранного. Фильм не найден'));

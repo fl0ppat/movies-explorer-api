@@ -34,7 +34,7 @@ router.post('/', celebrate({
 
 router.delete('/:id', celebrate({
   params: Joi.object({
-    id: Joi.string().hex().length(24).messages({
+    id: Joi.number().required().min(0).messages({
       'string.hex': 'Ошибка в полученном id',
       'string.length': 'Ошибка в полученном id',
     }),

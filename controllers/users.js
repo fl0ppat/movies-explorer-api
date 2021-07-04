@@ -1,17 +1,16 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-const User = require('../models/user');
-const NotFoundError = require('../errors/NotFound');
-const UnauthorizedError = require('../errors/Unauthorized');
+const User = require("../models/user");
+const NotFoundError = require("../errors/NotFound");
+const UnauthorizedError = require("../errors/Unauthorized");
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.user)
-    .orFail(new NotFoundError('Пользователь не найден'))
-    .then((user) => res.status(200)
-      .send({ name: user.name, email: user.email, movies: user.movies }))
+    .orFail(new NotFoundError("Пользователь не найден"))
+    .then((user) => res.status(200).send({ name: user.name, email: user.email, movies: user.movies }))
     .catch((err) => next(err));
 };
 
@@ -26,28 +25,30 @@ module.exports.updateUserData = (req, res, next) => {
   }
 
   User.findByIdAndUpdate(req.user, newData, { runValidators: true, new: true })
-    .orFail(new NotFoundError('Пользователь не найден'))
+    .orFail(new NotFoundError("Пользователь не найден"))
     .then((user) => res.send({ name: user.name, email: user.email, movies: user.movies }))
     .catch((err) => next(err));
 };
 
 module.exports.createUser = (req, res, next) => {
-  if (typeof (req.body) === 'undefined') {
-    return next(new UnauthorizedError('Указан неверный логин или пароль'));
+  if (typeof req.body === "undefined") {
+    return next(new UnauthorizedError("Указан неверный логин или пароль"));
   }
-  const {
-    name,
-    email,
-    password,
-  } = req.body;
+  const { name, email, password } = req.body;
 
   return bcrypt.hash(password, 10).then((hash) => {
     User.create({
-      name, email, password: hash,
+      name,
+      email,
+      password: hash,
     })
-      .then((user) => res.send({
-        _id: user._id, name, email,
-      }))
+      .then((user) =>
+        res.send({
+          _id: user._id,
+          name,
+          email,
+        })
+      )
       .catch((err) => next(err));
   });
 };
@@ -55,27 +56,29 @@ module.exports.createUser = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   let _id;
-  User.findOne({ email }).select('+password')
+  User.findOne({ email })
+    .select("+password")
     .then((user) => {
       if (!user) {
-        return Promise.reject(new UnauthorizedError('Указан неверный логин или пароль'));
+        return Promise.reject(new UnauthorizedError("Указан неверный логин или пароль"));
       }
       _id = user._id;
       return bcrypt.compare(password, user.password);
     })
     .then((matched) => {
       if (!matched) {
-        return Promise.reject(new UnauthorizedError('Указан неверный логин или пароль'));
+        return Promise.reject(new UnauthorizedError("Указан неверный логин или пароль"));
       }
-      return res.status(200).cookie(
-        '_id',
-        jwt.sign(_id.toJSON(), NODE_ENV === 'production' ? JWT_SECRET : '12345'),
-        { maxAge: 604800000, /* 7days */ httpOnly: true },
-      ).status(200).send({ mesage: 'Вход выполнен' });
+      const token = jwt.sign(_id.toJSON(), NODE_ENV === "production" ? JWT_SECRET : "12345");
+      return res
+        .status(200)
+        .cookie("_id", token, { maxAge: 604800000, /* 7days */ httpOnly: true })
+        .status(200)
+        .send({ token });
     })
     .catch((err) => next(err));
 };
 
 module.exports.signOut = (req, res) => {
-  res.clearCookie('_id').send({ message: 'Выход успешно совершён' });
+  res.clearCookie("_id").send({ message: "Выход успешно совершён" });
 };
